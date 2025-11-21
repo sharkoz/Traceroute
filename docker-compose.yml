@@ -1,0 +1,37 @@
+version: "3.9"
+
+services:
+  app:
+    #build:
+    #  dockerfile: Dockerfile
+    image: traceroute-monitor
+    environment:
+      PHX_HOST: localhost
+      PORT: "4000"
+      SECRET_KEY_BASE: "900856b48def1c8b01bf39b0159583d5a8ee7ee46d200c961ec02aee21973400823f5c6ea3e382f549ceb8f5f3f3f54b5378f8f1a38d2924bbdaf872eea3bd34"
+      DATABASE_URL: ecto://traceroute:traceroute@db:3306/traceroute_db
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "4000:4000"
+
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: traceroute_db
+      MYSQL_USER: traceroute
+      MYSQL_PASSWORD: traceroute
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - traceroute_db_data:/var/lib/mysql
+
+volumes:
+  traceroute_db_data:
+
